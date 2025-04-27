@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Type Quiz</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        .container {
+            background: white;
+            width: 60%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        h1 {
+            color: #333;
+        }
+        #sentence {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        select, .btn-option {
+            padding: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 12px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: 0.3s;
+        }
+        .btn-submit {
+            background: #28a745;
+            color: white;
+        }
+        .btn-submit:hover {
+            background: #218838;
+        }
+        .btn-next {
+            background: #007bff;
+            color: white;
+            cursor: not-allowed;
+        }
+        .btn-next.active {
+            cursor: pointer;
+            background: #0056b3;
+        }
+        #result {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .counter {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            font-size: 1em;
+            font-weight: bold;
+            color: #555;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sentence Type Quiz</h1>
+        <p id="sentence"></p>
+        <select id="answer">
+            <option value="">-- Select Sentence Type --</option>
+            <option value="simple">Simple</option>
+            <option value="compound">Compound</option>
+            <option value="complex">Complex</option>
+            <option value="compound-complex">Compound-Complex</option>
+        </select>
+        <br>
+        <button class="btn btn-submit" onclick="checkAnswer()">Submit</button>
+        <button class="btn btn-next" id="nextBtn" onclick="loadQuestion()" disabled>Next Question</button>
+        <p id="result"></p>
+        <p class="counter">Question: <span id="questionCounter">1</span>/125</p>
+    </div>
+
+    <script>
+        const sentences = [
+            // 25 Simple Sentences
+            { text: "She loves reading books.", type: "simple", explanation: "A simple sentence has one independent clause." },
+            { text: "The dog barked loudly.", type: "simple", explanation: "A simple sentence has one independent clause." },
+            // Add 23 more simple sentences...
+            
+            // 25 Compound Sentences
+            { text: "She loves reading, but he prefers watching movies.", type: "compound", explanation: "A compound sentence has two independent clauses joined by a coordinating conjunction." },
+            { text: "I wanted to go outside, yet it was raining.", type: "compound", explanation: "A compound sentence has two independent clauses joined by a coordinating conjunction." },
+            // Add 23 more compound sentences...
+            
+            // 25 Complex Sentences
+            { text: "Because she was tired, she went to bed early.", type: "complex", explanation: "A complex sentence has one independent clause and at least one dependent clause." },
+            { text: "When the sun set, the sky turned orange.", type: "complex", explanation: "A complex sentence has one independent clause and at least one dependent clause." },
+            // Add 23 more complex sentences...
+
+            // 25 Compound-Complex Sentences
+            { text: "Because she loves music, she sings every day, and she plays the piano.", type: "compound-complex", explanation: "A compound-complex sentence has at least two independent clauses and one or more dependent clauses." },
+            { text: "Although he was tired, he finished his work, and he went to bed late.", type: "compound-complex", explanation: "A compound-complex sentence has at least two independent clauses and one or more dependent clauses." },
+            // Add 23 more compound-complex sentences...
+        ];
+
+        // Generate Clause Questions from Complex Sentences
+        const clauseQuestions = sentences
+            .filter(s => s.type === "complex")
+            .map(s => {
+                const parts = s.text.split(",");
+                const highlighted = Math.random() < 0.5 ? parts[0] : parts[1]; // Randomly highlight an independent or dependent clause
+                const clauseType = highlighted.includes("because") || highlighted.includes("when") || highlighted.includes("if") ? "dependent" : "independent";
+                return {
+                    text: s.text.replace(highlighted, `<span class="highlight">${highlighted}</span>`),
+                    type: clauseType,
+                    explanation: clauseType === "dependent" ? "A dependent clause cannot stand alone as a sentence." : "An independent clause can stand alone as a complete sentence."
+                };
+            });
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentQuestion = {};
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function loadQuestion() {
+            if (shuffledQuestions.length === 0) {
+                shuffledQuestions = shuffleArray([...sentences, ...clauseQuestions]);
+            }
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("sentence").innerHTML = currentQuestion.text;
+            document.getElementById("result").textContent = "";
+            document.getElementById("answer").value = "";
+            document.getElementById("nextBtn").disabled = true;
+            document.getElementById("nextBtn").classList.remove("active");
+            document.getElementById("questionCounter").textContent = currentQuestionIndex + 1;
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById("answer").value;
+            if (!userAnswer) {
+                document.getElementById("result").textContent = "❌ Please select an answer before proceeding.";
+                return;
+            }
+            if (userAnswer === currentQuestion.type) {
+                document.getElementById("result").textContent = "✅ Correct! Well done!";
+            } else {
+                document.getElementById("result").textContent = `❌ Incorrect. ${currentQuestion.explanation}`;
+            }
+            document.getElementById("nextBtn").disabled = false;
+            document.getElementById("nextBtn").classList.add("active");
+            currentQuestionIndex++;
+        }
+
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
